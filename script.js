@@ -11,6 +11,9 @@ function initialize(){
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     aimtrainer = new AIMTRAINER();
+    document.addEventListener("click", (e) => {
+        aimtrainer.handleClicks(e.clientX, e.clientY);
+    })
     animationLoop(l);
 }
 function resizeCanvas(){
@@ -25,10 +28,26 @@ function animationLoop(t){
 }
 class AIMTRAINER{
     constructor(){
+        this.targetsHit = 0;
         this.width = 50;
         this.targets = [];
         this.targetTimer = 0;
         this.targetInterval = 1000;
+    }
+    handleClicks(x, y){
+        this.targets.forEach((target) => {
+            if(target.id === 1){
+                if(x >= target.x && 
+                    x <= (target.x + target.width) &&
+                    y >= target.y && 
+                    y <= (target.y + target.height)){
+                        target.markedForDeletion = true;
+                        this.targetsHit++;
+                    }
+            }else if(target.id === 2){
+                
+            }
+        })
     }
     update(ctx, deltatime){
         this.#draw(ctx);
@@ -37,6 +56,9 @@ class AIMTRAINER{
             this.spawnNewTarget();
             this.targetTimer = 0;
         }
+        this.targets = this.targets.filter((target) => {
+            return !target.markedForDeletion
+        });
     }
     #draw(ctx){
         this.targets.forEach((target) => {
@@ -53,7 +75,7 @@ class AIMTRAINER{
         if(Math.random() < 0.5){
             this.targets.push(new TARGET_SQUARE(this.width, this.width));
         }else{
-            this.targets.push(new TARGET_CIRCLE(this.width/2));
+            this.targets.push(new TARGET_CIRCLE(this.width / 2));
         }
     }
 }
@@ -64,6 +86,7 @@ class TARGET_SQUARE{
         this.y = Math.random() * (CANVAS.height - height);
         this.width = width;
         this.height = height;
+        this.markedForDeletion = false;
     }
 }
 class TARGET_CIRCLE{
@@ -72,5 +95,6 @@ class TARGET_CIRCLE{
         this.x = Math.random() * (CANVAS.width - radius) + radius;
         this.y = Math.random() * (CANVAS.height - radius) + radius;
         this.radius = radius;
+        this.markedForDeletion = false;
     }
 }
