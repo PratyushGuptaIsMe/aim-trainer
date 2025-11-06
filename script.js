@@ -11,7 +11,7 @@ function initialize(){
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     aimtrainer = new AIMTRAINER();
-    document.addEventListener("click", (e) => {
+    CANVAS.addEventListener("click", (e) => {
         aimtrainer.handleClicks(e.clientX, e.clientY);
     })
     animationLoop(l);
@@ -29,23 +29,30 @@ function animationLoop(t){
 class AIMTRAINER{
     constructor(){
         this.targetsHit = 0;
+        this.missedClicks = 0;
         this.width = 50;
         this.targets = [];
         this.targetTimer = 0;
         this.targetInterval = 1000;
     }
     handleClicks(x, y){
+        this.missedClicks++;
         this.targets.forEach((target) => {
             if(target.id === 1){
                 if(x >= target.x && 
-                    x <= (target.x + target.width) &&
-                    y >= target.y && 
-                    y <= (target.y + target.height)){
-                        target.markedForDeletion = true;
-                        this.targetsHit++;
-                    }
+                x <= (target.x + target.width) &&
+                y >= target.y && 
+                y <= (target.y + target.height)){
+                    target.markedForDeletion = true;
+                    this.targetsHit++;
+                    this.missedClicks--;
+                }
             }else if(target.id === 2){
-                
+                if(((x - target.x) ** 2 + (y - target.y) ** 2) < (target.radius**2)){
+                    target.markedForDeletion = true;
+                    this.targetsHit++;
+                    this.missedClicks--;
+                }
             }
         })
     }
@@ -61,6 +68,8 @@ class AIMTRAINER{
         });
     }
     #draw(ctx){
+        ctx.save();
+        ctx.fillStyle = "red";
         this.targets.forEach((target) => {
             if(target.id === 1){
                 ctx.fillRect(target.x, target.y, target.width, target.height);
@@ -70,6 +79,12 @@ class AIMTRAINER{
                 ctx.fill();
             }
         })
+        ctx.restore();
+        ctx.textBaseline = "top";
+        ctx.textAlign = "left";
+        ctx.font = "bold 40px 'Hind Siliguri'"
+        ctx.fillText("Targets hit: " + this.targetsHit, 10, 20);
+        ctx.fillText("Missed clicks: " + this.missedClicks, 10, 70);
     }
     spawnNewTarget(){
         if(Math.random() < 0.5){
