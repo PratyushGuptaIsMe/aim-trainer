@@ -86,6 +86,14 @@ class AIMTRAINER{
                 }
             }
         })
+        ctx.fillRect(10, 115, 440, 40);
+        if(x >= 10 && 
+            x <= (10 + 440) &&
+            y >= 115 && 
+            y <= (115 + 40)){
+                this.missedClicks--;
+                this.disappearingTargets = !this.disappearingTargets;
+        }
     }
     update(ctx, deltatime){
         this.#draw(ctx);
@@ -95,7 +103,7 @@ class AIMTRAINER{
             this.targetTimer = 0;
         }
         this.targets = this.targets.filter((target) => {
-            return !target.markedForDeletion
+            return !target.markedForDeletion;
         });
     }
     #draw(ctx){
@@ -116,18 +124,25 @@ class AIMTRAINER{
         ctx.font = "bold 40px 'Hind Siliguri', sans-serif";
         ctx.fillText("Targets hit: " + this.targetsHit, 10, 20);
         ctx.fillText("Missed clicks: " + this.missedClicks, 10, 70);
+        ctx.save();
+        ctx.fillStyle = "rgba(220, 168, 0, 1)";
+        ctx.fillText("Disappear targets?: " + this.disappearingTargets, 10, 120);
         if(this.disappearingTargets){
-            ctx.fillText("Disappeared targets: " + this.disappearedTargets, 10, 120);
+            ctx.fillStyle = "rgba(241, 255, 42, 1)";
+            ctx.fillText("Disappeared targets: " + this.disappearedTargets, 10, 170);
         }
+        ctx.restore();
     }
     spawnNewTarget(){
         if(Math.random() < 0.5){
             let t = new TARGET_SQUARE(this.width, this.width);
             this.targets.push(t);
+            if(this.disappearingTargets){
                 setTimeout(() => {
                     t.markedForDeletion = true;
-                    this.disappearedTargets++;
+                    t.disappearedTargets++;
                 }, this.targetAliveTime)
+            }
         }else{
             let t = new TARGET_CIRCLE(this.width / 2);
             this.targets.push(t);
