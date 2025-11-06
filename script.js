@@ -33,7 +33,9 @@ class AIMTRAINER{
         this.width = 50;
         this.targets = [];
         this.targetTimer = 0;
-        this.targetInterval = 1000;
+        this.targetInterval = 500;
+        this.disappearingTargets = true;
+        this.targetAliveTime = 2000;
     }
     handleClicks(x, y){
         this.missedClicks++;
@@ -88,9 +90,19 @@ class AIMTRAINER{
     }
     spawnNewTarget(){
         if(Math.random() < 0.5){
-            this.targets.push(new TARGET_SQUARE(this.width, this.width));
+            let t = new TARGET_SQUARE(this.width, this.width);
+            this.targets.push(t);
+                setTimeout(() => {
+                    t.markedForDeletion = true;
+                }, this.targetAliveTime)
         }else{
-            this.targets.push(new TARGET_CIRCLE(this.width / 2));
+            let t = new TARGET_CIRCLE(this.width / 2);
+            this.targets.push(t);
+            if(this.disappearingTargets){
+                setTimeout(() => {
+                    t.markedForDeletion = true;
+                }, this.targetAliveTime)
+            }
         }
     }
 }
