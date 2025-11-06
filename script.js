@@ -126,7 +126,7 @@ class AIMTRAINER{
             this.targets.push(t);
                 setTimeout(() => {
                     t.markedForDeletion = true;
-                    t.disappearedTargets++;
+                    this.disappearedTargets++;
                 }, this.targetAliveTime)
         }else{
             let t = new TARGET_CIRCLE(this.width / 2);
@@ -134,7 +134,7 @@ class AIMTRAINER{
             if(this.disappearingTargets){
                 setTimeout(() => {
                     t.markedForDeletion = true;
-                    t.disappearedTargets++;
+                    this.disappearedTargets++;
                 }, this.targetAliveTime)
             }
         }
