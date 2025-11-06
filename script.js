@@ -2,23 +2,51 @@ let CANVAS;
 let ctx;
 let aimtrainer;
 let l = 0;
+let outerCanvas;
+let outerLayerCTX;
+let mouseCOORDS = {
+    x: 1,
+    y: 0
+};
 document.addEventListener("DOMContentLoaded", () => {
     initialize();
 })
 function initialize(){
     CANVAS = document.getElementById("mainCanvas");
     ctx = CANVAS.getContext('2d');
+    outerCanvas = document.createElement('canvas');
+    outerLayerCTX = outerCanvas.getContext('2d');
+    outerCanvas.classList.add("cursorOverlay");
+    document.body.appendChild(outerCanvas);
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     aimtrainer = new AIMTRAINER();
     CANVAS.addEventListener("click", (e) => {
         aimtrainer.handleClicks(e.clientX, e.clientY);
     })
+    document.addEventListener("mousemove", (e) => {
+        mouseCOORDS.x = e.clientX;
+        mouseCOORDS.y = e.clientY;
+    })
     animationLoop(l);
+    drawCursorOverlay();
+}
+function drawCursorOverlay(){
+    outerLayerCTX.clearRect(0, 0, outerCanvas.width, outerCanvas.height);
+
+    outerLayerCTX.save();
+    outerLayerCTX.translate(mouseCOORDS.x, mouseCOORDS.y);
+    outerLayerCTX.fillRect(-12, -2, 21, 1);
+    outerLayerCTX.fillRect(-2, -12, 1, 21);
+    outerLayerCTX.restore();
+
+    requestAnimationFrame(drawCursorOverlay);
 }
 function resizeCanvas(){
     CANVAS.width = window.innerWidth;
     CANVAS.height = window.innerHeight;
+    outerCanvas.width = window.innerWidth;
+    outerCanvas.height = window.innerHeight;
 }
 function animationLoop(t){
     ctx.clearRect(0, 0, CANVAS.width, CANVAS.height)
@@ -30,11 +58,12 @@ class AIMTRAINER{
     constructor(){
         this.targetsHit = 0;
         this.missedClicks = 0;
-        this.width = 50;
+        this.width = 25;
         this.targets = [];
         this.targetTimer = 0;
         this.targetInterval = 500;
-        this.disappearingTargets = true;
+        this.disappearingTargets = true;   //disappear targets or not
+        this.disappearedTargets = 0;
         this.targetAliveTime = 2000;
     }
     handleClicks(x, y){
@@ -50,7 +79,7 @@ class AIMTRAINER{
                     this.missedClicks--;
                 }
             }else if(target.id === 2){
-                if(((x - target.x) ** 2 + (y - target.y) ** 2) < (target.radius**2)){
+                if(((x - target.x) ** 2 + (y - target.y) ** 2) < (target.radius ** 2)){
                     target.markedForDeletion = true;
                     this.targetsHit++;
                     this.missedClicks--;
@@ -84,9 +113,12 @@ class AIMTRAINER{
         ctx.restore();
         ctx.textBaseline = "top";
         ctx.textAlign = "left";
-        ctx.font = "bold 40px 'Hind Siliguri'"
+        ctx.font = "bold 40px 'Hind Siliguri', sans-serif";
         ctx.fillText("Targets hit: " + this.targetsHit, 10, 20);
         ctx.fillText("Missed clicks: " + this.missedClicks, 10, 70);
+        if(this.disappearingTargets){
+            ctx.fillText("Disappeared targets: " + this.disappearedTargets, 10, 120);
+        }
     }
     spawnNewTarget(){
         if(Math.random() < 0.5){
@@ -94,6 +126,7 @@ class AIMTRAINER{
             this.targets.push(t);
                 setTimeout(() => {
                     t.markedForDeletion = true;
+                    t.disappearedTargets++;
                 }, this.targetAliveTime)
         }else{
             let t = new TARGET_CIRCLE(this.width / 2);
@@ -101,6 +134,7 @@ class AIMTRAINER{
             if(this.disappearingTargets){
                 setTimeout(() => {
                     t.markedForDeletion = true;
+                    t.disappearedTargets++;
                 }, this.targetAliveTime)
             }
         }

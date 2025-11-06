@@ -12,6 +12,17 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
+body {
+  cursor: none;
+}
 #mainCanvas {
-    background-color: aqua;
+  background-color: aqua;
+}
+.cursorOverlay {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: transparent;
+  z-index: 96942969;
 }
