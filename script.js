@@ -14,6 +14,7 @@ let mouseCOORDS = {
     y: 0
 };
 let resizeCursor = 0;
+
 document.addEventListener("DOMContentLoaded", () => {
     initialize();
 })
@@ -29,6 +30,8 @@ function initialize(){
     aimtrainer = new AIMTRAINER();
     CANVAS.addEventListener("click", (e) => {
         aimtrainer.handleClicks(e.clientX, e.clientY);
+    });
+    CANVAS.addEventListener("mousedown", () => {
         resizeCursor = -1;
     })
     document.addEventListener("mousemove", (e) => {
@@ -44,11 +47,11 @@ function drawCursorOverlay(){
         console.log(resizeCursor)
 
     if(resizeCursor === -1){
-        crosshairSize = crosshairSize - 0.3;
+        crosshairSize = crosshairSize - 0.4;
         crosshairDeductionTimeV = crosshairDeductionTimeV + deltatime;
     }
     if(resizeCursor === 1){
-        crosshairSize = crosshairSize + 0.3;
+        crosshairSize = crosshairSize + 0.4;
         crosshairDeductionTimeV = crosshairDeductionTimeV + deltatime;
     }
     if(crosshairDeductionTimeV > 100){
