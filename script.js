@@ -2,14 +2,18 @@ let CANVAS;
 let ctx;
 let aimtrainer;
 let l = 0;
+let crosshairDeductionTimeV = 0;
 let outerCanvas;
-let crosshairSize = 10;
+const DEFAULTCROSSHAIRSIZE = 10;
+let crosshairSize = DEFAULTCROSSHAIRSIZE;
 let lineThickness = 2;
 let outerLayerCTX;
+let deltatime = l;
 let mouseCOORDS = {
     x: 1,
     y: 0
 };
+let resizeCursor = 0;
 document.addEventListener("DOMContentLoaded", () => {
     initialize();
 })
@@ -25,7 +29,7 @@ function initialize(){
     aimtrainer = new AIMTRAINER();
     CANVAS.addEventListener("click", (e) => {
         aimtrainer.handleClicks(e.clientX, e.clientY);
-        resizeCursorOverlay(crosshairSize);
+        resizeCursor = -1;
     })
     document.addEventListener("mousemove", (e) => {
         mouseCOORDS.x = e.clientX;
@@ -34,12 +38,27 @@ function initialize(){
     animationLoop(l);
     drawCursorOverlay();
 }
-function resizeCursorOverlay(){
-    
-}
 function drawCursorOverlay(){
     outerLayerCTX.clearRect(0, 0, outerCanvas.width, outerCanvas.height);
+    console.log(crosshairDeductionTimeV)
+        console.log(resizeCursor)
 
+    if(resizeCursor === -1){
+        crosshairSize = crosshairSize - 0.3;
+        crosshairDeductionTimeV = crosshairDeductionTimeV + deltatime;
+    }
+    if(resizeCursor === 1){
+        crosshairSize = crosshairSize + 0.3;
+        crosshairDeductionTimeV = crosshairDeductionTimeV + deltatime;
+    }
+    if(crosshairDeductionTimeV > 100){
+        resizeCursor = 1;
+    }
+    if(crosshairDeductionTimeV > 200){
+        resizeCursor = 0;
+        crosshairDeductionTimeV = 0;
+        crosshairSize = DEFAULTCROSSHAIRSIZE;
+    }
     outerLayerCTX.save();
     outerLayerCTX.translate(mouseCOORDS.x, mouseCOORDS.y);
     outerLayerCTX.fillRect(-crosshairSize, -lineThickness / 2, crosshairSize * 2, lineThickness);
@@ -56,9 +75,9 @@ function resizeCanvas(){
 }
 function animationLoop(t){
     ctx.clearRect(0, 0, CANVAS.width, CANVAS.height)
-    aimtrainer.update(ctx, t - l);
+    deltatime = t - l;
     l = t;
-    console.log(t);
+    aimtrainer.update(ctx, deltatime);
     requestAnimationFrame(animationLoop);
 }
 class AIMTRAINER{
