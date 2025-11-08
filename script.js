@@ -3,6 +3,8 @@ let ctx;
 let aimtrainer;
 let l = 0;
 let outerCanvas;
+let crosshairSize = 10;
+let lineThickness = 2;
 let outerLayerCTX;
 let mouseCOORDS = {
     x: 1,
@@ -23,6 +25,7 @@ function initialize(){
     aimtrainer = new AIMTRAINER();
     CANVAS.addEventListener("click", (e) => {
         aimtrainer.handleClicks(e.clientX, e.clientY);
+        resizeCursorOverlay(crosshairSize);
     })
     document.addEventListener("mousemove", (e) => {
         mouseCOORDS.x = e.clientX;
@@ -31,13 +34,16 @@ function initialize(){
     animationLoop(l);
     drawCursorOverlay();
 }
+function resizeCursorOverlay(){
+    
+}
 function drawCursorOverlay(){
     outerLayerCTX.clearRect(0, 0, outerCanvas.width, outerCanvas.height);
 
     outerLayerCTX.save();
     outerLayerCTX.translate(mouseCOORDS.x, mouseCOORDS.y);
-    outerLayerCTX.fillRect(-12, -2, 21, 1);
-    outerLayerCTX.fillRect(-2, -12, 1, 21);
+    outerLayerCTX.fillRect(-crosshairSize, -lineThickness / 2, crosshairSize * 2, lineThickness);
+    outerLayerCTX.fillRect(-lineThickness / 2, -crosshairSize, lineThickness, crosshairSize * 2);
     outerLayerCTX.restore();
 
     requestAnimationFrame(drawCursorOverlay);
@@ -52,17 +58,27 @@ function animationLoop(t){
     ctx.clearRect(0, 0, CANVAS.width, CANVAS.height)
     aimtrainer.update(ctx, t - l);
     l = t;
+    console.log(t);
     requestAnimationFrame(animationLoop);
 }
 class AIMTRAINER{
     constructor(){
+        this.timeinMS = 0;
+        this.timeInSeconds = this.timeinMS/1000;
+        this.startTime = performance.now();
+
+        setInterval(() => {
+            let now = performance.now();
+            this.timeinMS = now - this.startTime;
+            this.timeInSeconds = this.timeinMS / 1000;
+        }, 10);
         this.targetsHit = 0;
         this.missedClicks = 0;
         this.width = 25;
         this.targets = [];
         this.targetTimer = 0;
         this.targetInterval = 500;
-        this.disappearingTargets = true;   //disappear targets or not
+        this.disappearingTargets = false;   //disappear targets or not
         this.disappearedTargets = 0;
         this.targetAliveTime = 2000;
     }
@@ -86,11 +102,10 @@ class AIMTRAINER{
                 }
             }
         })
-        ctx.fillRect(10, 115, 440, 40);
         if(x >= 10 && 
             x <= (10 + 440) &&
-            y >= 115 && 
-            y <= (115 + 40)){
+            y >= 165 && 
+            y <= (165 + 40)){
                 this.missedClicks--;
                 this.disappearingTargets = !this.disappearingTargets;
         }
@@ -124,12 +139,13 @@ class AIMTRAINER{
         ctx.font = "bold 40px 'Hind Siliguri', sans-serif";
         ctx.fillText("Targets hit: " + this.targetsHit, 10, 20);
         ctx.fillText("Missed clicks: " + this.missedClicks, 10, 70);
+        ctx.fillText("Time elapsed (seconds): " + this.timeInSeconds.toFixed(2), 10, 120);
         ctx.save();
         ctx.fillStyle = "rgba(220, 168, 0, 1)";
-        ctx.fillText("Disappear targets?: " + this.disappearingTargets, 10, 120);
+        ctx.fillText("Disappear targets?: " + this.disappearingTargets, 10, 170);
         if(this.disappearingTargets){
             ctx.fillStyle = "rgba(241, 255, 42, 1)";
-            ctx.fillText("Disappeared targets: " + this.disappearedTargets, 10, 170);
+            ctx.fillText("Disappeared targets: " + this.disappearedTargets, 10, 220);
         }
         ctx.restore();
     }
