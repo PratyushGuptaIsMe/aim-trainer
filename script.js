@@ -96,7 +96,7 @@ class AIMTRAINER{
         }, 10);
         this.targetsHit = 0;
         this.missedClicks = 0;
-        this.width = 25;
+        this.width = 25;    //size of targets
         this.targets = [];
         this.targetTimer = 0;
         this.targetInterval = 500;
